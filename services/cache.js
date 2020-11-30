@@ -7,15 +7,27 @@ const redisUrl = "redis://localhost:6379";
 const client = redis.createClient(redisUrl);
 client.get = promisify(client.get);
 
+// Create a `cache` prototype to mongoose Query
+
 // Reference the Original mongoose prototypal `exec` method
 const exec = mongoose.Query.prototype.exec;
+
+mongoose.Query.prototype.useCache = function () {
+	this._cache = true;
+
+	return this;
+};
 
 // Monkey-patch (hijack) the mongoose prototypal `exec` method
 /**
  * @returns { Promise }
  */
 mongoose.Query.prototype.exec = async function () {
-	// client.flushall();
+	// // Check to optionally cache
+	if (!this._cache) {
+		return exec.apply(this, arguments);
+	}
+
 	// Create a unique but consistent `cache-key`
 	const cacheKey = JSON.stringify(
 		Object.assign({}, this.getQuery(), {
