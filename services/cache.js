@@ -3,17 +3,20 @@ const redis = require("redis");
 const { promisify } = require("util");
 
 // Setup REDIS
-const redisUrl = "redis://localhost:6379";
-const client = redis.createClient(redisUrl);
-client.get = promisify(client.get);
+// const redisUrl = "redis://localhost:6379";
+// const client = redis.createClient(redisUrl);
+const client = redis.createClient();
+client.hget = promisify(client.hget);
 
 // Create a `cache` prototype to mongoose Query
 
 // Reference the Original mongoose prototypal `exec` method
 const exec = mongoose.Query.prototype.exec;
 
-mongoose.Query.prototype.useCache = function () {
-	this._cache = true;
+mongoose.Query.prototype.useCache = function (options = {}) {
+	this._cache = {
+		hashKey: JSON.stringify(options.key || ""),
+	};
 
 	return this;
 };
@@ -23,7 +26,7 @@ mongoose.Query.prototype.useCache = function () {
  * @returns { Promise }
  */
 mongoose.Query.prototype.exec = async function () {
-	// // Check to optionally cache
+	// Check for optional caching
 	if (!this._cache) {
 		return exec.apply(this, arguments);
 	}
@@ -36,13 +39,13 @@ mongoose.Query.prototype.exec = async function () {
 	);
 
 	// Get the already `cached-value` based off the `cache-key` from the `redis-server`
-	let cacheValue = await client.get(cacheKey);
+	let cacheValue = await client.hget(this._cache.hashKey, cacheKey);
 
 	if (cacheValue) {
 		cacheValue = JSON.parse(cacheValue);
 		let doc;
 
-		// We have to query mongoose in other to get a Document;
+		// We have to return query mongoose in other to get a Document;
 		// eg new Blog(<filter: plain JSON>) --> new this.model(cacheValue: plain JSON)
 
 		// If the value which was cached is an Array object. this means we must return an array on mongoose Docs
@@ -60,7 +63,7 @@ mongoose.Query.prototype.exec = async function () {
 	const execDoc = await exec.apply(this, arguments);
 
 	// and then set`cached-value` to `redis-server`
-	client.set(cacheKey, JSON.stringify(execDoc));
+	client.hset(this._cache.hashKey, cacheKey, JSON.stringify(execDoc));
 
 	return execDoc;
 };
