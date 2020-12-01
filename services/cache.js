@@ -55,6 +55,8 @@ mongoose.Query.prototype.exec = async function () {
 			doc = new this.model(cacheValue);
 		}
 
+		console.log("SERVING FROM CACHE");
+
 		// Have to return a mongoose Document and not a plain JSON(from cache)
 		return doc;
 	}
@@ -65,6 +67,14 @@ mongoose.Query.prototype.exec = async function () {
 	// and then set`cached-value` to `redis-server`
 	client.hset(this._cache.hashKey, cacheKey, JSON.stringify(execDoc));
 
+	console.log("SERVING FROM MONGODB");
+
 	return execDoc;
+};
+
+module.exports = {
+	clearHash: (hashKey) => {
+		client.del(JSON.stringify(hashKey));
+	},
 };
 
