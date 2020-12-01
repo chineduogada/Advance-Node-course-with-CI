@@ -9,5 +9,7 @@ test("Adds two number", () => {
 test("We can launch a Browser", async () => {
 	const browser = await puppeteer.launch({ headless: false });
 	const page = await browser.newPage();
+
+	await page.goto("localhost:3000");
 });
 
