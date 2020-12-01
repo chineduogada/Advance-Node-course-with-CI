@@ -11,17 +11,23 @@ beforeEach(async () => {
 	await page.goto("http://127.0.0.1:3000");
 });
 
-afterEach(async () => await browser.close());
+// afterEach(async () => await browser.close());
 
-test("We can launch a Browser", async () => {
-	const text = await page.$eval("a.brand-logo", (el) => el.innerHTML);
+describe("Header", () => {
+	test("has a correct `brand` text", async () => {
+		const brand = await page.$eval("a.brand-logo", (el) => el.innerHTML);
 
-	expect(text).toBe("Blogster");
-});
+		expect(brand).toBe("Blogster");
+	});
 
-test("We can launch a Browser", async () => {
-	const text = await page.$eval("a.brand-logo", (el) => el.innerHTML);
+	test("clicking login starts OAuth flow", async () => {
+		await page.click('.right [href="/auth/google"]');
 
-	expect(text).toBe("Blogster");
+		const url = await page.url();
+
+		console.log(url);
+
+		// expect(text).toBe("Blogster");
+	});
 });
 
