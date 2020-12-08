@@ -14,27 +14,27 @@ beforeEach(async () => {
 	await page.goto("http://127.0.0.1:3000");
 });
 
-// afterEach(async () => await browser.close());
+afterEach(async () => await browser.close());
 
 describe("Header", () => {
-	// test("has a correct `brand` text", async () => {
-	// 	const brand = await page.$eval("a.brand-logo", (el) => el.innerHTML);
+	test("has a correct `brand` text", async () => {
+		const brand = await page.$eval("a.brand-logo", (el) => el.innerHTML);
 
-	// 	expect(brand).toBe("Blogster");
-	// });
+		expect(brand).toBe("Blogster");
+	});
 
-	// test("clicking login starts OAuth flow", async () => {
-	// 	await page.click('.right [href="/auth/google"]');
+	test("clicking login starts OAuth flow", async () => {
+		await page.click('.right [href="/auth/google"]');
 
-	// 	const url = await page.url();
+		const url = await page.url();
 
-	// 	// expect(url).toContain("accounts.google.com");
-	// 	expect(url).toMatch(/accounts\.google\.com/i);
-	// });
+		expect(url).toMatch(/accounts\.google\.com/i);
+	});
 
 	test("when signed in, shows `logout` button", async () => {
 		const keygrip = new Keygrip([keys.cookieKey]);
 
+		// id of a real user from the DB
 		const user = "5fbbd86a764e500728c768ce";
 		const sessionObj = {
 			passport: { user },
@@ -49,9 +49,23 @@ describe("Header", () => {
 		const signStr = "session=" + session;
 		const sessionSig = keygrip.sign(signStr);
 
-		console.log(session, sessionSig);
+		// set session and signature and  then reload to fake login
+		await page.setCookie({
+			name: "session",
+			value: session,
+		});
+		await page.setCookie({
+			name: "session.sig",
+			value: sessionSig,
+		});
+		await page.reload();
 
-		expect("2").toBe("2");
+		const logoutSelector = ".right a[href='/auth/logout']";
+		// wait 1sec for the logout btn to show after reload
+		await page.waitFor(logoutSelector, { timeout: 1000 });
+		const text = await page.$eval(logoutSelector, (el) => el.innerHTML);
+
+		expect(text).toMatch(/logout/i);
 	});
 });
 
