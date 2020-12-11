@@ -3,6 +3,9 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
+	"jest": {
+		"setupTestFrameworkScriptFile": "./tests/setupTest.js"
+	},
 	"scripts": {
 		"start": "node index.js",
 		"server": "nodemon index.js --ignore tests",
@@ -11,9 +14,6 @@
 		"build": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client",
 		"heroku-postbuild": "npm run build",
 		"test": "jest"
-	},
-	"jest": {
-		"setupTestFrameworkScriptFile": "./__tests__/setupTest.js"
 	},
 	"author": "",
 	"license": "ISC",

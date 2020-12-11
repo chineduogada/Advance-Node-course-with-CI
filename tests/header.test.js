@@ -1,5 +1,6 @@
 const puppeteer = require("puppeteer");
-const sessionsFactory = require("./factories/sessionFactory");
+const sessionFactory = require("./factories/sessionFactory");
+const userFactory = require("./factories/userFactory");
 
 beforeAll(() => jest.setTimeout(500000));
 
@@ -30,7 +31,8 @@ describe("Header", () => {
 	});
 
 	test("when signed in, shows `logout` button", async () => {
-		const { session, sig } = sessionsFactory(user);
+		const user = await userFactory();
+		const { session, sig } = sessionFactory(user);
 
 		// set session and signature and  then reload to fake login
 		await page.setCookie({
