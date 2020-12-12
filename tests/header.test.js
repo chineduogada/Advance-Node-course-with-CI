@@ -1,5 +1,3 @@
-const sessionFactory = require("./factories/sessionFactory");
-const userFactory = require("./factories/userFactory");
 const Page = require("./helpers/page");
 
 beforeAll(() => jest.setTimeout(500000));
@@ -15,7 +13,7 @@ afterEach(async () => await page.close());
 
 describe("Header", () => {
 	test("has a correct `brand` text", async () => {
-		const brand = await page.$eval("a.brand-logo", (el) => el.innerHTML);
+		const brand = await page.getContentsOf("a.brand-logo");
 
 		expect(brand).toBe("Blogster");
 	});
@@ -29,25 +27,9 @@ describe("Header", () => {
 	});
 
 	test("when signed in, shows `logout` button", async () => {
-		const user = await userFactory();
-		const { session, sig } = sessionFactory(user);
+		await page.login();
 
-		// set session and signature and  then reload to fake login
-		await page.setCookie({
-			name: "session",
-			value: session,
-		});
-
-		await page.setCookie({
-			name: "session.sig",
-			value: sig,
-		});
-		await page.reload();
-
-		const logoutSelector = ".right a[href='/auth/logout']";
-		// wait 1sec for the logout btn to show after reload
-		await page.waitFor(logoutSelector, { timeout: 1000 });
-		const text = await page.$eval(logoutSelector, (el) => el.innerHTML);
+		const text = await page.getContentsOf(".right a[href='/auth/logout']");
 
 		expect(text).toMatch(/logout/i);
 	});
