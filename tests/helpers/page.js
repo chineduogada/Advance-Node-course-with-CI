@@ -6,24 +6,28 @@ class CustomPage {
 		const browser = await puppeteer.launch({ headless: true });
 		const page = await browser.newPage();
 
-		const customPage = new CustomPage(page);
+		const customPage = new CustomPage(page, browser);
 
 		return new Proxy(customPage, {
 			get: (target, property) => {
 				return (
-					target[property] || browser[property] || target.page[property]
+					target[property] ||
+					target.page[property] ||
+					target.browser[property]
 				);
 			},
 		});
 	}
 
-	constructor(page) {
+	constructor(page, browser) {
 		this.page = page;
+		this.browser = browser;
 	}
 
 	async login() {
 		const user = await userFactory();
 		const { session, sig } = sessionFactory(user);
+		this.userId = user.id;
 
 		// set session and signature and  then reload to fake login
 		await this.page.setCookie({
@@ -41,6 +45,16 @@ class CustomPage {
 		await this.page.waitFor(".right a[href='/auth/logout']", {
 			timeout: 1000,
 		});
+	}
+
+	async close() {
+		// clear test user from the DB
+		if (this.userId) {
+			console.log("Cleaned TEST_USER from DB");
+			await userFactory(this.userId);
+		}
+
+		await this.browser.close();
 	}
 
 	async getContentsOf(selector) {
