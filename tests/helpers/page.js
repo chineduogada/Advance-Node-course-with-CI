@@ -10,7 +10,7 @@ class CustomPage {
 		return new Proxy(customPage, {
 			get: (target, property) => {
 				return (
-					target[property] || target.page[property] || browser[property]
+					target[property] || browser[property] || target.page[property]
 				);
 			},
 		});
@@ -20,7 +20,7 @@ class CustomPage {
 		this.page = page;
 	}
 
-	login = () => {};
+	login() {}
 }
 
 module.exports = CustomPage;

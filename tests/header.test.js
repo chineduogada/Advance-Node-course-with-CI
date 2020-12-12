@@ -1,19 +1,17 @@
-const puppeteer = require("puppeteer");
 const sessionFactory = require("./factories/sessionFactory");
 const userFactory = require("./factories/userFactory");
+const Page = require("./helpers/page");
 
 beforeAll(() => jest.setTimeout(500000));
 
-let browser, page;
+let page;
 
 beforeEach(async () => {
-	browser = await puppeteer.launch({ headless: false });
-	page = await browser.newPage();
-
+	page = await Page.build();
 	await page.goto("http://127.0.0.1:3000");
 });
 
-afterEach(async () => await browser.close());
+afterEach(async () => await page.close());
 
 describe("Header", () => {
 	test("has a correct `brand` text", async () => {
