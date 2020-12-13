@@ -1,7 +1,5 @@
 const Page = require("./helpers/page");
 
-beforeAll(() => jest.setTimeout(500000));
-
 let page;
 
 beforeEach(async () => {
@@ -18,16 +16,21 @@ describe("Header", () => {
 		expect(brand).toBe("Blogster");
 	});
 
-	test("clicking login starts OAuth flow", async () => {
-		await page.click('.right [href="/auth/google"]');
+	// test("clicking login starts OAuth flow", async () => {
+	// 	await page.click('.right [href="/auth/google"]');
 
-		const url = await page.url();
+	// 	const url = await page.url();
 
-		expect(url).toMatch(/accounts\.google\.com/i);
-	});
+	// 	expect(url).toMatch(/accounts\.google\.com/i);
+	// });
 
 	test("when signed in, shows `logout` button", async () => {
 		await page.login();
+
+		// wait 1sec for the logout btn to show after reload
+		await page.waitFor(".right a[href='/auth/logout']", {
+			timeout: 1000,
+		});
 
 		const text = await page.getContentsOf(".right a[href='/auth/logout']");
 

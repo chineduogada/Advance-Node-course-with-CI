@@ -1,12 +1,12 @@
 const puppeteer = require("puppeteer");
 const sessionFactory = require("../factories/sessionFactory");
 const userFactory = require("../factories/userFactory");
-class CustomPage {
+class Page {
 	static async build() {
-		const browser = await puppeteer.launch({ headless: true });
+		const browser = await puppeteer.launch({ headless: false });
 		const page = await browser.newPage();
 
-		const customPage = new CustomPage(page, browser);
+		const customPage = new Page(page, browser);
 
 		return new Proxy(customPage, {
 			get: (target, property) => {
@@ -39,18 +39,12 @@ class CustomPage {
 			name: "session.sig",
 			value: sig,
 		});
-		await this.page.reload();
-
-		// wait 1sec for the logout btn to show after reload
-		await this.page.waitFor(".right a[href='/auth/logout']", {
-			timeout: 1000,
-		});
+		await this.page.goto("http://127.0.0.1:3000/blogs");
 	}
 
 	async close() {
 		// clear test user from the DB
 		if (this.userId) {
-			console.log("Cleaned TEST_USER from DB");
 			await userFactory(this.userId);
 		}
 
@@ -62,5 +56,5 @@ class CustomPage {
 	}
 }
 
-module.exports = CustomPage;
+module.exports = Page;
 
