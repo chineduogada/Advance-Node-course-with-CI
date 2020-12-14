@@ -65,6 +65,26 @@ describe("When logged in", async () => {
 });
 
 describe("When not logged in", () => {
+	const actions = [
+		{ method: "get", path: "/api/blogs" },
+		{
+			method: "post",
+			path: "/api/blogs",
+			data: {
+				title: "test title",
+				content: "test content",
+			},
+		},
+	];
+
+	test("Blog related actions are prohibited", async () => {
+		const results = await page.execRequests(actions);
+
+		for (const result of results) {
+			expect(result).toEqual({ error: "You must log in!" });
+		}
+	});
+
 	test("renders no blogs", async () => {
 		await page.goto("http://localhost:3000/blogs");
 
@@ -81,24 +101,6 @@ describe("When not logged in", () => {
 
 		const label = await page.getContentsOf("form label");
 		expect(label).toMatch(/blog title/i);
-	});
-
-	test("User cannot create blog posts", async () => {
-		const result = await page.evaluate(async () => {
-			const response = await fetch("/api/blogs", {
-				method: "POST",
-				credentials: "same-origin",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					title: "test title",
-					content: "test content",
-				}),
-			});
-
-			return await response.json();
-		});
-
-		console.log(result);
 	});
 });
 
