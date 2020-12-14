@@ -24,9 +24,28 @@ describe("When logged in", async () => {
 	});
 
 	describe("And using valid inputs", async () => {
-		beforeEach(async () => {});
+		beforeEach(async () => {
+			await page.type(".title input", "test title");
+			await page.type(".content input", "test content");
+			await page.click("form button");
+		});
 
-		test("", async () => {});
+		test("submitting takes user to review screen", async () => {
+			const text = await page.getContentsOf("h5");
+
+			expect(text).toMatch(/please confirm your entries/i);
+		});
+
+		test("submitting then saving, adds blog to /index page", async () => {
+			await page.click("button.green");
+			await page.waitFor(".card");
+
+			const title = await page.getContentsOf(".card-title");
+			const content = await page.getContentsOf("p");
+
+			expect(title).toMatch(/test title/i);
+			expect(content).toMatch(/test content/i);
+		});
 	});
 
 	describe("And using invalid inputs", async () => {

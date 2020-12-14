@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const sessionFactory = require("../factories/sessionFactory");
 const userFactory = require("../factories/userFactory");
+
 class Page {
 	static async build() {
 		const browser = await puppeteer.launch({ headless: true });
