@@ -52,8 +52,10 @@ class Page {
 		await this.browser.close();
 	}
 
-	async getContentsOf(selector) {
-		return await this.page.$eval(selector, (el) => el.innerHTML);
+	async getContentsOf(selector, textContent) {
+		const cb = textContent ? (el) => el.textContent : (el) => el.innerHTML;
+
+		return await this.page.$eval(selector, cb);
 	}
 }
 

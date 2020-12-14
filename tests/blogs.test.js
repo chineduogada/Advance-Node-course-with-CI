@@ -64,3 +64,41 @@ describe("When logged in", async () => {
 	});
 });
 
+describe("When not logged in", () => {
+	test("renders no blogs", async () => {
+		await page.goto("http://localhost:3000/blogs");
+
+		const dashboard = await page.getContentsOf(".dashboard", true);
+		expect(dashboard).toMatch(/add/i);
+	});
+
+	test("should not submit the create blog form", async () => {
+		await page.goto("http://localhost:3000/blogs/new");
+
+		await page.type(".title input", "test title");
+		await page.type(".content input", "test content");
+		await page.click("form button");
+
+		const label = await page.getContentsOf("form label");
+		expect(label).toMatch(/blog title/i);
+	});
+
+	test("User cannot create blog posts", async () => {
+		const result = await page.evaluate(async () => {
+			const response = await fetch("/api/blogs", {
+				method: "POST",
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					title: "test title",
+					content: "test content",
+				}),
+			});
+
+			return await response.json();
+		});
+
+		console.log(result);
+	});
+});
+
