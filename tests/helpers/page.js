@@ -4,7 +4,10 @@ const userFactory = require("../factories/userFactory");
 
 class Page {
 	static async build() {
-		const browser = await puppeteer.launch({ headless: true });
+		const browser = await puppeteer.launch({
+			headless: true,
+			args: ["--no-snadbox"],
+		});
 		const page = await browser.newPage();
 
 		const customPage = new Page(page, browser);

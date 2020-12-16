@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 const redis = require("redis");
 const { promisify } = require("util");
+const keys = require("../config/keys");
 
 // Setup REDIS
-// const redisUrl = "redis://localhost:6379";
+const redisUrl = keys.redisUrl;
 // const client = redis.createClient(redisUrl);
-const client = redis.createClient();
+const client = redis.createClient(redisUrl);
 client.hget = promisify(client.hget);
 
 // Create a `cache` prototype to mongoose Query
